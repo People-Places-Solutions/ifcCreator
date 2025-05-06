@@ -24,15 +24,15 @@ body = ifcopenshell.api.context.add_context(model, context_type="Model",
     context_identifier="Body", target_view="MODEL_VIEW", parent=context)
 
 # Create a site, building, and storey. Many hierarchies are possible.
-site = ifcopenshell.api.root.create_entity(model, ifc_class="IfcSite", name="My Site")
-building = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuilding", name="Building A")
-storey = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="Ground Floor")
+# site = ifcopenshell.api.root.create_entity(model, ifc_class="IfcSite", name="My Site")
+# building = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuilding", name="Building A")
+# storey = ifcopenshell.api.root.create_entity(model, ifc_class="IfcBuildingStorey", name="Ground Floor")
 
 # Since the site is our top level location, assign it to the project
 # Then place our building on the site, and our storey in the building
-ifcopenshell.api.aggregate.assign_object(model, relating_object=project, products=[site])
-ifcopenshell.api.aggregate.assign_object(model, relating_object=site, products=[building])
-ifcopenshell.api.aggregate.assign_object(model, relating_object=building, products=[storey])
+# ifcopenshell.api.aggregate.assign_object(model, relating_object=project, products=[site])
+# ifcopenshell.api.aggregate.assign_object(model, relating_object=site, products=[building])
+# ifcopenshell.api.aggregate.assign_object(model, relating_object=building, products=[storey])
 
 # Let's create a new wall
 wall = ifcopenshell.api.root.create_entity(model, ifc_class="IfcWall")
@@ -46,7 +46,7 @@ representation = ifcopenshell.api.geometry.add_wall_representation(model, contex
 ifcopenshell.api.geometry.assign_representation(model, product=wall, representation=representation)
 
 # Place our wall in the ground floor
-ifcopenshell.api.spatial.assign_container(model, relating_structure=storey, products=[wall])
+# ifcopenshell.api.spatial.assign_container(model, relating_structure=storey, products=[wall])
 
 # Write out to a file
 model.write("ifc_out/wall_model.ifc")
