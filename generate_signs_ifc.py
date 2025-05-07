@@ -1,117 +1,59 @@
-import ifcopenshell
-import ifcopenshell.api
-import csv
+import ifcopenshell.api.pset
 import ifcopenshell.api.root
 import ifcopenshell.api.unit
 import ifcopenshell.api.context
 import ifcopenshell.api.project
-import ifcopenshell.api.spatial
 import ifcopenshell.api.geometry
-import ifcopenshell.api.aggregate
 
-def to_ifc_value(val):
-    if val is None or val == "":
-        return None
-    elif isinstance(val, (int, float)):
-        return ifcopenshell.entity_instance("IFCREAL", val)
-    elif isinstance(val, str):
-        return ifcopenshell.entity_instance("IFCTEXT", val)
-    else:
-        return ifcopenshell.entity_instance("IFCTEXT", str(val))
+import numpy as np
 
-
-# --- Data dictionary defines which attributes to attach ---
-data_dictionary = [
-    {"name": "SignHeight", "type": "IfcLengthMeasure"},
-    {"name": "SignText", "type": "IfcLabel"},
-    {"name": "Condition", "type": "IfcLabel"},
-    {"name": "InstalledDate", "type": "IfcDate"},
-]
-
-# --- Load sign data from CSV ---
-def load_signs_from_csv(filepath):
-    with open(filepath, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        signs = []
-        for row in reader:
-            # Convert numeric fields from strings
-            row["x"] = float(row["x"])
-            row["y"] = float(row["y"])
-            row["z"] = float(row["z"])
-            if "SignHeight" in row and row["SignHeight"]:
-                row["SignHeight"] = float(row["SignHeight"])
-            signs.append(row)
-        return signs
-
-signs = load_signs_from_csv("signs.csv")
-
-
-
-# Create a blank model
 model = ifcopenshell.api.project.create_file()
 
-# All projects must have one IFC Project element
+
 project = ifcopenshell.api.root.create_entity(model, ifc_class="IfcProject", name="My Project")
 
-# Geometry is optional in IFC, but because we want to use geometry in this example, let's define units
-# Assigning without arguments defaults to metric units
 ifcopenshell.api.unit.assign_unit(model)
 
-# Let's create a modeling geometry context, so we can store 3D geometry (note: IFC supports 2D too!)
 context = ifcopenshell.api.context.add_context(model, context_type="Model")
 
-# In particular, in this example we want to store the 3D "body" geometry of objects, i.e. the body shape
 body = ifcopenshell.api.context.add_context(model, context_type="Model",
     context_identifier="Body", target_view="MODEL_VIEW", parent=context)
 
-# Create a site, building, and storey. Many hierarchies are possible.
-site = ifcopenshell.api.root.create_entity(model, ifc_class="IfcSite", name="My Site")
+def add_property_set(file, product):
+    pset = ifcopenshell.api.pset.add_pset(file, product=product, name="Signs")
+    ifcopenshell.api.pset.edit_pset(file, pset=pset, properties={"sign_int": 37})
 
-ifc = model
+def create_sign(file, x, y, z):
+    matrix = np.array([[0, -1, 0, x], 
+                   [1, 0, 0, y], 
+                   [0, 0, 1, z],
+                   [0, 0, 0, 1]])
+    sign = ifcopenshell.api.root.create_entity(file, ifc_class = "IfcGeographicElement", predefined_type="Sign")
+    ifcopenshell.api.geometry.edit_object_placement(file, product=sign, matrix=matrix,is_si=True)
 
-# --- PropertySet helper ---
-def create_property_set(ifc, sign, dictionary):
-    props = []
-    for field in dictionary:
-        key = field["name"]
-        val = sign.get(key)
-        prop = ifc.create_entity(
-            "IfcPropertySingleValue",
-            Name=key,
-            NominalValue=to_ifc_value(val) if val else None
-        )
-        props.append(prop)
-    return ifc.create_entity(
-        "IfcPropertySet",
-        GlobalId=ifcopenshell.guid.new(),
-        Name="SignProperties",
-        HasProperties=props
-    )
+    vertices = [[(-1.,-1.,0.), (-1.,1.,0.), (1.,1.,0.), (1.,-1.,0.), (0.,0.,1.)]]
+    faces = [[(0,1,2,3), (0,4,1), (1,4,2), (2,4,3), (3,4,0)]]
+    sign_representation = ifcopenshell.api.geometry.add_mesh_representation(file, context=body, vertices=vertices, faces=faces)
+    ifcopenshell.api.geometry.assign_representation(file,product=sign,representation=sign_representation)
+    add_property_set(model, sign)
 
-# --- Create IFC elements for each sign ---
-for sign in signs:
-    proxy = ifcopenshell.api.run("root.create_entity", ifc, ifc_class="IfcBuildingElementProxy", name=sign["id"])
+def create_point(file, x, y, z):
+    matrix = np.array([[0, -1, 0, x], 
+                   [1, 0, 0, y], 
+                   [0, 0, 1, z],
+                   [0, 0, 0, 1]])
+    sign = ifcopenshell.api.root.create_entity(file, ifc_class = "IfcAnnotation", predefined_type="SurveyPoint")
+    ifcopenshell.api.geometry.edit_object_placement(file, product=sign, matrix=matrix,is_si=True)
 
-    # Place the sign at its coordinates
-    placement_matrix = [
-        [1, 0, 0, sign["x"]],
-        [0, 1, 0, sign["y"]],
-        [0, 0, 1, sign["z"]],
-        [0, 0, 0, 1],
-    ]
-    ifcopenshell.api.run("geometry.edit_object_placement", ifc, product=proxy, matrix=placement_matrix)
+    # vertices = [[(-1.,-1.,0.), (-1.,1.,0.), (1.,1.,0.), (1.,-1.,0.), (0.,0.,0.)]]
+    # faces = [[(0,1,2,3), (0,4,1), (1,4,2), (2,4,3), (3,4,0)]]
+    # sign_representation = ifcopenshell.api.geometry.add_mesh_representation(file, context=body, vertices=vertices, faces=faces)
+    # ifcopenshell.api.geometry.assign_representation(file,product=sign,representation=sign_representation)
+    add_property_set(model, sign)
 
-    ifcopenshell.api.run("spatial.assign_container", ifc, relating_structure=site, product=proxy)
 
-    # Add property set
-    pset = create_property_set(ifc, sign, data_dictionary)
-    ifc.create_entity(
-        "IfcRelDefinesByProperties",
-        GlobalId=ifcopenshell.guid.new(),
-        RelatingPropertyDefinition=pset,
-        RelatedObjects=[proxy]
-    )
+create_point(model, -3, -3, 0)
+create_sign(model, 3, 3, 0)
 
-# --- Write IFC file ---
-ifc.write("road_signs_from_csv.ifc")
-print("✅ IFC file saved as 'road_signs_from_csv.ifc'")
+
+model.write("ifc_out/element_model.ifc")

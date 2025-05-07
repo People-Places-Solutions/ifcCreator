@@ -35,7 +35,7 @@ body = ifcopenshell.api.context.add_context(model, context_type="Model",
 # ifcopenshell.api.aggregate.assign_object(model, relating_object=building, products=[storey])
 
 # Let's create a new wall
-wall = ifcopenshell.api.root.create_entity(model, ifc_class="IfcWall")
+wall = ifcopenshell.api.root.create_entity(model, ifc_class="IfcWall", predefined_type = "Sign")
 
 # Give our wall a local origin at (0, 0, 0)
 ifcopenshell.api.geometry.edit_object_placement(model, product=wall)
@@ -49,4 +49,4 @@ ifcopenshell.api.geometry.assign_representation(model, product=wall, representat
 # ifcopenshell.api.spatial.assign_container(model, relating_structure=storey, products=[wall])
 
 # Write out to a file
-model.write("ifc_out/wall_model.ifc")
+model.write("ifc_out/element_model.ifc")
