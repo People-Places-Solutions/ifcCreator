@@ -46,9 +46,9 @@ def import_signs(csv_in, unit):
         "INTERNATIONAL_FOOT" : 0.3048,
         "METER" : 1
     }
-    df['X_2011NAD83'] = df['X_2011NAD83']/unit_dict[unit]
-    df['Y_2011NAD83'] = df['Y_2011NAD83']/unit_dict[unit]
-    df['Z'] = df['Z']/unit_dict[unit]
+    df['X_2011NAD83'] = df['X_2011NAD83']*unit_dict[unit]
+    df['Y_2011NAD83'] = df['Y_2011NAD83']*unit_dict[unit]
+    df['Z'] = df['Z']*unit_dict[unit]
     return df
 
 
