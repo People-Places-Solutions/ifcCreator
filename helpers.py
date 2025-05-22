@@ -6,6 +6,9 @@ import ifcopenshell.api.project
 import ifcopenshell.api.geometry
 import numpy as np
 import pandas as pd
+import ifcopenshell
+import sys
+
 
 def add_property_set(file, product):
     pset = ifcopenshell.api.pset.add_pset(file, product=product, name="Signs")
@@ -51,6 +54,23 @@ def import_signs(csv_in, unit):
     df['Z'] = df['Z']*unit_dict[unit]
     return df
 
+
+def export_pset(model, out_file, pset_name, element_type='IfcGeographicElement'):
+    # this function reads a model, which can be read from an existing IFC with ifcopenshell.open(in_file)
+    # all elements of a certain type have their GlobalId and all properties in a specific property set exported
+    signs = model.by_type(element_type)
+    if not signs:
+        print(f"No elements of type {element_type} found in the IFC file.")
+        return None
+
+    element_data = []
+    for sign in signs:
+        psets = ifcopenshell.util.element.get_psets(sign)
+        psets[pset_name]["GlobalId"] = sign.GlobalId
+        element_data.append(psets[pset_name])
+
+    df = pd.DataFrame(element_data)
+    df.to_csv(out_file,index=False)
 
 if __name__ == "__main__":
     import_signs(r"data\Finalsets_merged_XYZ.csv", "US_SURVEY_FOOT")

@@ -1,6 +1,8 @@
 import ifcopenshell
 from ifccsv import IfcCsv
 import sys
+
+
 in_file = r"ifc_out\placed_sign_meshes.ifc"
 
 # Load your IFC file
