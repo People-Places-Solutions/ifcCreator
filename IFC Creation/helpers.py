@@ -8,10 +8,11 @@ import numpy as np
 import pandas as pd
 import ifcopenshell
 import sys
+import bsdd
 
 
 def add_property_set(file, product):
-    pset = ifcopenshell.api.pset.add_pset(file, product=product, name="Signs")
+    pset = ifcopenshell.api.pset.add_pset(file, product=product, name="wsdotsigns")
     ifcopenshell.api.pset.edit_pset(file, pset=pset, properties={"sign_int": 37})
 
 def create_sign(file, body, x, y, z):
@@ -19,14 +20,15 @@ def create_sign(file, body, x, y, z):
                    [1, 0, 0, y], 
                    [0, 0, 1, z],
                    [0, 0, 0, 1]])
-    sign = ifcopenshell.api.root.create_entity(file, ifc_class = "IfcGeographicElement", predefined_type="Sign")
+    sign = ifcopenshell.api.root.create_entity(file, ifc_class = "IfcCivilElement", predefined_type="IfcSign")
     ifcopenshell.api.geometry.edit_object_placement(file, product=sign, matrix=matrix,is_si=True)
 
     vertices = [[(-1.,-1.,0.), (-1.,1.,0.), (1.,1.,0.), (1.,-1.,0.), (0.,0.,1.)]]
     faces = [[(0,1,2,3), (0,4,1), (1,4,2), (2,4,3), (3,4,0)]]
     sign_representation = ifcopenshell.api.geometry.add_mesh_representation(file, context=body, vertices=vertices, faces=faces)
     ifcopenshell.api.geometry.assign_representation(file,product=sign,representation=sign_representation)
-    add_property_set(file, sign)
+    # add_property_set(file, sign)
+    # add_bsdd_properties(file, sign,"https://identifier.buildingsmart.org/uri/wsdot/wsdotsigns/0.1.0")
 
 def create_point(file, body, x, y, z):
     matrix = np.array([[0, -1, 0, x], 
@@ -71,6 +73,13 @@ def export_pset(model, out_file, pset_name, element_type='IfcGeographicElement')
 
     df = pd.DataFrame(element_data)
     df.to_csv(out_file,index=False)
+
+def add_bsdd_properties(model, element, url):
+    client = bsdd.Client()
+    data = client.get_properties(url)
+
+    for prop in data["properties"]:
+        bsdd.apply_ifc_classification_properties(model, element, prop["uri"])
 
 if __name__ == "__main__":
     import_signs(r"data\Finalsets_merged_XYZ.csv", "US_SURVEY_FOOT")

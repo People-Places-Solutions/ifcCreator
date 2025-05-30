@@ -18,7 +18,7 @@ context = ifcopenshell.api.context.add_context(model, context_type="Model")
 body = ifcopenshell.api.context.add_context(model, context_type="Model",
     context_identifier="Body", target_view="MODEL_VIEW", parent=context)
 
-input_data = r"data\Finalsets_merged_XYZ.csv"
+input_data = r"data\Finalsets_merged_XYZ_one_sign.csv"
 
 data = helpers.import_signs(input_data, "US_SURVEY_FOOT")
 
@@ -26,4 +26,4 @@ data = helpers.import_signs(input_data, "US_SURVEY_FOOT")
 for index, row in data.iterrows():
     helpers.create_sign(model, body, row['X_2011NAD83'], row['Y_2011NAD83'], row['Z'])
 
-model.write("ifc_out/placed_sign_meshes.ifc")
+model.write("ifc_out/one_sign.ifc")
