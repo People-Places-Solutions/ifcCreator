@@ -34,4 +34,3 @@ class MicroStationImporter:
             print(f"Import command sent for: {excel_path}")
         except Exception as e:
             raise RuntimeError(f"Failed to send key-in to MicroStation: {e}")
-    
