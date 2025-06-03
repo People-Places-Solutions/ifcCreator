@@ -1,5 +1,8 @@
 import argparse
 import pandas as pd
+import os
+import shutil
+
 
 def get_command_line_input():
     """
@@ -54,3 +57,16 @@ def get_ifc_excel_table(ifc_item_type, data_path):
     excel_workbook_path = f"{data_path}\\{ifc_item_type['Library']}.xlsx"
     ifc_dataframe = pd.read_excel(excel_workbook_path, sheet_name=item_type_name)
     return ifc_dataframe
+
+def copy_xlsx_files(source_dir, dest_dir):
+    # Ensure destination directory exists
+    os.makedirs(dest_dir, exist_ok=True)
+    
+    # Iterate over all files in the source directory
+    for filename in os.listdir(source_dir):
+        if filename.endswith('.xlsx'):
+            source_file = os.path.join(source_dir, filename)
+            dest_file = os.path.join(dest_dir, filename)
+            shutil.copy2(source_file, dest_file)
+            print(f"Copied {filename} to {dest_dir}")
+
