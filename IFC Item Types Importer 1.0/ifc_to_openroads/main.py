@@ -1,16 +1,16 @@
-# IFC to OpenRoads Item Types Importer v1.0
+"""Main entry point for the IFC to OpenRoads Item Types Importer."""
+
+# IFC to OpenRoads Item Types Importer v1.0from pathlib import Path
+from pathlib import Path
 import config
 import extractor
 import helpers
 import merger
-from microstation_importer import MicroStationImporter
-from pathlib import Path
+import microstation_importer
 
 if __name__ == "__main__":
-    """
-    Main entry point for the IFC to OpenRoads Item Types Importer.
-    Please refer to the README.md for usage instructions.
-    """
+    # Please refer to the README.md for usage instructions.
+
     # Get the input IFC file from command line arguments
     input_ifc_file = helpers.get_command_line_input()
 
@@ -23,7 +23,8 @@ if __name__ == "__main__":
         input_ifc_file, config.IFC_ELEMENT_TYPE, config.ITEM_TYPES
     )
 
-    # Pull the Item Type Excel files from the data directory to create table with correct columns and rows
+    # Pull the Item Type Excel files from the data directory to
+    # create table with correct columns and rows
     # including the ElementId
     item_type_excel_tables = helpers.get_excel_tables(
         config.ITEM_TYPES, config.DATA_DIRECTORY
@@ -48,5 +49,5 @@ if __name__ == "__main__":
     # For each Item Type Excel file, import the Item Types into OpenRoads
     for table in data_tables_merged:
         excel_workbook_path = f"{config.DATA_DIRECTORY}\\{table['Library']}.xlsx"
-        importer = MicroStationImporter()
+        importer = microstation_importer.MicroStationImporter()
         importer.import_itemtypes_from_excel(excel_workbook_path)
