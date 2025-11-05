@@ -16,7 +16,7 @@ class MicroStationImporter:
             self.app = win32com.client.GetActiveObject(app_name)
             print(f"Connected to {app_name} successfully.")
         except Exception as e:
-            raise RuntimeError(f"Failed to connect to MicroStation: {e}")
+            raise RuntimeError(f"Failed to connect to MicroStation: {e}") from e
 
     def import_itemtypes_from_excel(self, excel_path: str):
         """
@@ -33,4 +33,4 @@ class MicroStationImporter:
             self.app.CadInputQueue.SendKeyin(keyin)
             print(f"Import command sent for: {excel_path}")
         except Exception as e:
-            raise RuntimeError(f"Failed to send key-in to MicroStation: {e}")
+            raise RuntimeError(f"Failed to send key-in to MicroStation: {e}") from e
