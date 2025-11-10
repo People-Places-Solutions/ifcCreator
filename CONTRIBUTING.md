@@ -49,22 +49,6 @@ git push origin contrib/add-contributing-md
 
 If using GitHub UI: Add file → Commit to a new branch → Create Pull Request.
 
-## Development setup
-- Requirements: Node 16+, Python 3.10+, etc. (edit for your stack)
-- Install dependencies:
-```bash
-# example for a JS project
-npm install
-```
-- Run tests:
-```bash
-npm test
-```
-- Run linters/formatters:
-```bash
-npm run lint
-npm run format
-```
 
 ## Code style and tests
 - Follow the code style in existing files.
