@@ -41,4 +41,4 @@ Samuel Smith with Jacobs (smith.samuel@jacobs.com)
 ## Version History
 
 * 0.1
-    * Initial Release
+    * Initial Release published as part of WSDOT ADCMS report. Contact Jim.Mahugh@wsdot.wa.gov for the report.
